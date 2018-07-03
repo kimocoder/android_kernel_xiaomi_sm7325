@@ -400,6 +400,9 @@ error:
 	return ERR_PTR(ret);
 }
 
+static const struct dma_buf_attach_ops amdgpu_dma_buf_attach_ops = {
+};
+
 /**
  * amdgpu_gem_prime_import - &drm_driver.gem_prime_import implementation
  * @dev: DRM device
