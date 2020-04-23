@@ -27,7 +27,6 @@ static inline void qcom_glink_smem_unregister(struct qcom_glink *glink) {}
 
 #endif
 
-
 #if IS_ENABLED(CONFIG_RPMSG_QCOM_GLINK_SPSS)
 
 struct qcom_glink *qcom_glink_spss_register(struct device *parent,
@@ -66,5 +65,11 @@ static inline void qcom_glink_spi_unregister(struct glink_spi *glink) {}
 
 #endif
 
+
+#if IS_ENABLED(CONFIG_RPMSG_QCOM_GLINK_SSR)
+void qcom_glink_ssr_notify(const char *ssr_name);
+#else
+static inline void qcom_glink_ssr_notify(const char *ssr_name) {}
+#endif
 
 #endif
