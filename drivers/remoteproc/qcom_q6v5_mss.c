@@ -183,8 +183,6 @@ struct q6v5 {
 	int active_reg_count;
 	int proxy_reg_count;
 
-	bool running;
-
 	bool dump_mba_loaded;
 	size_t current_dump_size;
 	size_t total_dump_size;
@@ -1336,7 +1334,6 @@ static int q6v5_start(struct rproc *rproc)
 
 	/* Reset Dump Segment Mask */
 	qproc->current_dump_size = 0;
-	qproc->running = true;
 
 	return 0;
 
@@ -1351,8 +1348,6 @@ static int q6v5_stop(struct rproc *rproc)
 {
 	struct q6v5 *qproc = (struct q6v5 *)rproc->priv;
 	int ret;
-
-	qproc->running = false;
 
 	ret = qcom_q6v5_request_stop(&qproc->q6v5);
 	if (ret == -ETIMEDOUT)
