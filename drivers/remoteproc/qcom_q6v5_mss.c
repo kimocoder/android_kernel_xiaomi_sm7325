@@ -9,6 +9,7 @@
 
 #include <linux/clk.h>
 #include <linux/delay.h>
+#include <linux/devcoredump.h>
 #include <linux/dma-mapping.h>
 #include <linux/interrupt.h>
 #include <linux/kernel.h>
@@ -35,6 +36,8 @@
 #include <linux/qcom_scm.h>
 
 #define MPSS_CRASH_REASON_SMEM		421
+
+#define MBA_LOG_SIZE			SZ_4K
 
 /* RMB Status Register Values */
 #define RMB_PBL_SUCCESS			0x1
@@ -140,6 +143,7 @@ struct rproc_hexagon_res {
 	int version;
 	bool need_mem_protection;
 	bool has_alt_reset;
+	bool has_mba_logs;
 	bool has_spare_reg;
 };
 
@@ -200,6 +204,7 @@ struct q6v5 {
 	struct qcom_sysmon *sysmon;
 	bool need_mem_protection;
 	bool has_alt_reset;
+	bool has_mba_logs;
 	bool has_spare_reg;
 	int mpss_perm;
 	int mba_perm;
@@ -520,6 +525,26 @@ static int q6v5_rmb_mba_wait(struct q6v5 *qproc, u32 status, int ms)
 	return val;
 }
 
+static void q6v5_dump_mba_logs(struct q6v5 *qproc)
+{
+	struct rproc *rproc = qproc->rproc;
+	void *data;
+
+	if (!qproc->has_mba_logs)
+		return;
+
+	if (q6v5_xfer_mem_ownership(qproc, &qproc->mba_perm, true, false, qproc->mba_phys,
+				    qproc->mba_size))
+		return;
+
+	data = vmalloc(MBA_LOG_SIZE);
+	if (!data)
+		return;
+
+	memcpy(data, qproc->mba_region, MBA_LOG_SIZE);
+	dev_coredumpv(&rproc->dev, data, MBA_LOG_SIZE, GFP_KERNEL);
+}
+
 static int q6v5proc_reset(struct q6v5 *qproc)
 {
 	u32 val;
@@ -838,6 +863,7 @@ static int q6v5_mba_load(struct q6v5 *qproc)
 {
 	int ret;
 	int xfermemop_ret;
+	bool mba_load_err = false;
 
 	qcom_q6v5_prepare(&qproc->q6v5);
 
@@ -927,7 +953,7 @@ halt_axi_ports:
 	q6v5proc_halt_axi_port(qproc, qproc->halt_map, qproc->halt_q6);
 	q6v5proc_halt_axi_port(qproc, qproc->halt_map, qproc->halt_modem);
 	q6v5proc_halt_axi_port(qproc, qproc->halt_map, qproc->halt_nc);
-
+	mba_load_err = true;
 reclaim_mba:
 	xfermemop_ret = q6v5_xfer_mem_ownership(qproc, &qproc->mba_perm, true,
 						false, qproc->mba_phys,
@@ -935,6 +961,8 @@ reclaim_mba:
 	if (xfermemop_ret) {
 		dev_err(qproc->dev,
 			"Failed to reclaim mba buffer, system may become unstable\n");
+	} else if (mba_load_err) {
+		q6v5_dump_mba_logs(qproc);
 	}
 
 disable_active_clks:
@@ -1291,6 +1319,7 @@ static int q6v5_start(struct rproc *rproc)
 
 reclaim_mpss:
 	q6v5_mba_reclaim(qproc);
+	q6v5_dump_mba_logs(qproc);
 
 	return ret;
 }
@@ -1710,6 +1739,7 @@ static int q6v5_probe(struct platform_device *pdev)
 
 	qproc->version = desc->version;
 	qproc->need_mem_protection = desc->need_mem_protection;
+	qproc->has_mba_logs = desc->has_mba_logs;
 
 	ret = qcom_q6v5_init(&qproc->q6v5, pdev, rproc, MPSS_CRASH_REASON_SMEM,
 			     qcom_msa_handover);
@@ -1801,6 +1831,7 @@ static const struct rproc_hexagon_res sc7180_mss = {
 	},
 	.need_mem_protection = true,
 	.has_alt_reset = false,
+	.has_mba_logs = true,
 	.has_spare_reg = true,
 	.version = MSS_SC7180,
 };
@@ -1836,6 +1867,7 @@ static const struct rproc_hexagon_res sdm845_mss = {
 	},
 	.need_mem_protection = true,
 	.has_alt_reset = true,
+	.has_mba_logs = false,
 	.has_spare_reg = false,
 	.version = MSS_SDM845,
 };
@@ -1863,6 +1895,7 @@ static const struct rproc_hexagon_res msm8998_mss = {
 	},
 	.need_mem_protection = true,
 	.has_alt_reset = false,
+	.has_mba_logs = false,
 	.has_spare_reg = false,
 	.version = MSS_MSM8998,
 };
@@ -1893,6 +1926,7 @@ static const struct rproc_hexagon_res msm8996_mss = {
 	},
 	.need_mem_protection = true,
 	.has_alt_reset = false,
+	.has_mba_logs = false,
 	.has_spare_reg = false,
 	.version = MSS_MSM8996,
 };
@@ -1926,6 +1960,7 @@ static const struct rproc_hexagon_res msm8916_mss = {
 	},
 	.need_mem_protection = false,
 	.has_alt_reset = false,
+	.has_mba_logs = false,
 	.has_spare_reg = false,
 	.version = MSS_MSM8916,
 };
@@ -1967,6 +2002,7 @@ static const struct rproc_hexagon_res msm8974_mss = {
 	},
 	.need_mem_protection = false,
 	.has_alt_reset = false,
+	.has_mba_logs = false,
 	.has_spare_reg = false,
 	.version = MSS_MSM8974,
 };
