@@ -634,6 +634,7 @@ static const struct clk_rpmh_desc clk_rpmh_sdxlemur = {
 	.num_clks = ARRAY_SIZE(sdxlemur_rpmh_clocks),
 };
 
+<<<<<<< HEAD
 DEFINE_CLK_RPMH_VRM(parrot, ln_bb_clk3, ln_bb_clk3_ao, "lnbclka3", 2);
 
 static struct clk_hw *parrot_rpmh_clocks[] = {
@@ -655,6 +656,29 @@ static struct clk_hw *parrot_rpmh_clocks[] = {
 static const struct clk_rpmh_desc clk_rpmh_parrot = {
 	.clks = parrot_rpmh_clocks,
 	.num_clks = ARRAY_SIZE(parrot_rpmh_clocks),
+=======
+DEFINE_CLK_RPMH_ARC(yupik, bi_tcxo, bi_tcxo_ao, "xo.lvl", 0x3, 4);
+
+static struct clk_hw *yupik_rpmh_clocks[] = {
+	[RPMH_CXO_CLK]		= &yupik_bi_tcxo.hw,
+	[RPMH_CXO_CLK_A]	= &yupik_bi_tcxo_ao.hw,
+	[RPMH_LN_BB_CLK2]	= &lahaina_ln_bb_clk2.hw,
+	[RPMH_LN_BB_CLK2_A]	= &lahaina_ln_bb_clk2_ao.hw,
+	[RPMH_RF_CLK1]		= &lahaina_rf_clk1.hw,
+	[RPMH_RF_CLK1_A]	= &lahaina_rf_clk1_ao.hw,
+	[RPMH_RF_CLK3]		= &lahaina_rf_clk3.hw,
+	[RPMH_RF_CLK3_A]	= &lahaina_rf_clk3_ao.hw,
+	[RPMH_RF_CLK4]		= &lahaina_rf_clk4.hw,
+	[RPMH_RF_CLK4_A]	= &lahaina_rf_clk4_ao.hw,
+	[RPMH_IPA_CLK]		= &lahaina_ipa.hw,
+	[RPMH_PKA_CLK]		= &lahaina_pka.hw,
+	[RPMH_HWKM_CLK]		= &lahaina_hwkm.hw,
+};
+
+static const struct clk_rpmh_desc clk_rpmh_yupik = {
+	.clks = yupik_rpmh_clocks,
+	.num_clks = ARRAY_SIZE(yupik_rpmh_clocks),
+>>>>>>> d99d8106a2b0 (clk: qcom: rpmh: Add support for PMIC clocks for YUPIK)
 };
 
 static struct clk_hw *of_clk_rpmh_hw_get(struct of_phandle_args *clkspec,
@@ -755,6 +779,7 @@ static const struct of_device_id clk_rpmh_match_table[] = {
 	{ .compatible = "qcom,sm8150-rpmh-clk", .data = &clk_rpmh_sm8150},
 	{ .compatible = "qcom,lahaina-rpmh-clk", .data = &clk_rpmh_lahaina},
 	{ .compatible = "qcom,shima-rpmh-clk", .data = &clk_rpmh_shima},
+	{ .compatible = "qcom,yupik-rpmh-clk", .data = &clk_rpmh_yupik},
 	{ .compatible = "qcom,sm8250-rpmh-clk", .data = &clk_rpmh_sm8250},
 	{ .compatible = "qcom,waipio-rpmh-clk", .data = &clk_rpmh_waipio},
 	{ .compatible = "qcom,sdxlemur-rpmh-clk", .data = &clk_rpmh_sdxlemur},
