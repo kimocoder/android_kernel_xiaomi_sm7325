@@ -909,4 +909,13 @@ config TCSRCC
 	  Say Y if you want to support miscellaneous top-level clocks
 	  such as for the PHY references.
 
+config SM_VIDEOCC_YUPIK
+	tristate "YUPIK Video Clock Controller"
+	select SM_GCC_YUPIK
+	help
+	  Support for the video clock controller on Qualcomm Technologies, Inc.
+	  YUPIK devices.
+	  Say Y if you want to support video devices and functionality such as
+	  video encode/decode.
+
 endif
