@@ -777,6 +777,7 @@ static const struct soc_id soc_id[] = {
 	{ 458, "SDXLEMUR" },
 	{ 475, "YUPIK" },
 	{ 482, "WAIPIOP" },
+	{ 499, "YUPIKP" },
 	{ 506, "DIWALI" },
 	{ 547, "DIWALIP" },
 	{ 564, "DIWALI-LTE" },
