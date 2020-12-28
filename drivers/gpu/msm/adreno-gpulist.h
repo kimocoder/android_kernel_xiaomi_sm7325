@@ -1720,7 +1720,8 @@ static const struct adreno_a6xx_core adreno_gpu_core_a635 = {
 	.base = {
 		DEFINE_ADRENO_REV(ADRENO_REV_A635, 6, 3, 5, ANY_ID),
 		.features = ADRENO_APRIV | ADRENO_IOCOHERENT |
-				ADRENO_CONTENT_PROTECTION,
+				ADRENO_CONTENT_PROTECTION |
+				ADRENO_PREEMPTION,
 		.gpudev = &adreno_a6xx_gmu_gpudev.base,
 		.perfcounters = &adreno_a6xx_perfcounters,
 		.gmem_base = 0,
