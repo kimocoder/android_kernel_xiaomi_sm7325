@@ -1160,6 +1160,46 @@ int add_memory(int nid, u64 start, u64 size)
 }
 EXPORT_SYMBOL_GPL(add_memory);
 
+int add_memory_subsection(int nid, u64 start, u64 size)
+{
+	struct mhp_params params = { .pgprot = PAGE_KERNEL };
+	struct resource *res;
+	int ret;
+
+	if (size == memory_block_size_bytes())
+		return add_memory(nid, start, size, MHP_NONE);
+
+	if (!IS_ALIGNED(start, SUBSECTION_SIZE) ||
+	    !IS_ALIGNED(size, SUBSECTION_SIZE)) {
+		pr_err("%s: start 0x%lx size 0x%lx not aligned to subsection size\n",
+			   __func__, start, size);
+		return -EINVAL;
+	}
+
+	res = register_memory_resource(start, size, "System RAM");
+	if (IS_ERR(res))
+		return PTR_ERR(res);
+
+	mem_hotplug_begin();
+
+	nid = memory_add_physaddr_to_nid(start);
+
+	if (IS_ENABLED(CONFIG_ARCH_KEEP_MEMBLOCK))
+		memblock_add_node(start, size, nid);
+
+	ret = arch_add_memory(nid, start, size, &params);
+	if (ret) {
+		if (IS_ENABLED(CONFIG_ARCH_KEEP_MEMBLOCK))
+			memblock_remove(start, size);
+		pr_err("%s failed to add subsection start 0x%lx size 0x%lx\n",
+			   __func__, start, size);
+	}
+	mem_hotplug_done();
+
+	return ret;
+}
+EXPORT_SYMBOL_GPL(add_memory_subsection);
+
 #ifdef CONFIG_MEMORY_HOTREMOVE
 /*
  * A free page on the buddy free lists (not the per-cpu lists) has PageBuddy
@@ -1863,4 +1903,39 @@ int remove_memory(int nid, u64 start, u64 size)
 	return rc;
 }
 EXPORT_SYMBOL_GPL(remove_memory);
+
+int remove_memory_subsection(int nid, u64 start, u64 size)
+{
+	if (size ==  memory_block_size_bytes())
+		return remove_memory(nid, start, size);
+
+	if (!IS_ALIGNED(start, SUBSECTION_SIZE) ||
+	    !IS_ALIGNED(size, SUBSECTION_SIZE)) {
+		pr_err("%s: start 0x%lx size 0x%lx not aligned to subsection size\n",
+			   __func__, start, size);
+		return -EINVAL;
+	}
+
+	mem_hotplug_begin();
+
+	if (test_pages_isolated(start, start + size, MEMORY_OFFLINE)) {
+		pr_err("%s: [%lx, %lx) PFNs are not isolated\n",
+			   __func__, start, start + size);
+		mem_hotplug_done();
+		return -EBUSY;
+	}
+
+	arch_remove_memory(nid, start, size, NULL);
+
+	if (IS_ENABLED(CONFIG_ARCH_KEEP_MEMBLOCK))
+		memblock_remove(start, size);
+
+	release_mem_region_adjustable(start, size);
+
+	mem_hotplug_done();
+
+	return 0;
+}
+EXPORT_SYMBOL_GPL(remove_memory_subsection);
+
 #endif /* CONFIG_MEMORY_HOTREMOVE */
