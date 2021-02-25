@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
- * Copyright (c) 2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
  */
 
 #ifndef _QCOM_SYSTEM_HEAP_H
@@ -11,7 +11,6 @@
 #include "qcom_dynamic_page_pool.h"
 
 struct qcom_system_heap {
-	struct device *dev;
 	int uncached;
 	struct dynamic_page_pool **pool_list;
 	int vmid;
