@@ -1155,7 +1155,7 @@ bool __qcom_scm_pas_supported(struct device *dev, u32 peripheral)
 }
 
 int __qcom_scm_pas_init_image(struct device *dev, u32 peripheral,
-			      dma_addr_t metadata_phys)
+			      dma_addr_t metadata)
 {
 	int ret;
 	struct qcom_scm_desc desc = {
@@ -1165,7 +1165,7 @@ int __qcom_scm_pas_init_image(struct device *dev, u32 peripheral,
 	};
 
 	desc.args[0] = peripheral;
-	desc.args[1] = metadata_phys;
+	desc.args[1] = metadata;
 	desc.arginfo = QCOM_SCM_ARGS(2, QCOM_SCM_VAL, QCOM_SCM_RW);
 
 	ret = qcom_scm_call(dev, &desc);

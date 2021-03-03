@@ -253,35 +253,17 @@ EXPORT_SYMBOL(qcom_scm_pas_supported);
  *
  * Returns 0 on success.
  */
-int qcom_scm_pas_init_image(u32 peripheral, const void *metadata, size_t size)
+int qcom_scm_pas_init_image(u32 peripheral, dma_addr_t metadata)
 {
-	dma_addr_t mdata_phys;
-	void *mdata_buf;
 	int ret;
-
-	/*
-	 * During the scm call memory protection will be enabled for the meta
-	 * data blob, so make sure it's physically contiguous, 4K aligned and
-	 * non-cachable to avoid XPU violations.
-	 */
-	mdata_buf = dma_alloc_coherent(__scm->dev, size, &mdata_phys,
-				       GFP_KERNEL);
-	if (!mdata_buf) {
-		dev_err(__scm->dev, "Allocation of metadata buffer failed.\n");
-		return -ENOMEM;
-	}
-	memcpy(mdata_buf, metadata, size);
 
 	ret = qcom_scm_clk_enable();
 	if (ret)
-		goto free_metadata;
+		return ret;
 
-	ret = __qcom_scm_pas_init_image(__scm->dev, peripheral, mdata_phys);
+	ret = __qcom_scm_pas_init_image(__scm->dev, peripheral, metadata);
 
 	qcom_scm_clk_disable();
-
-free_metadata:
-	dma_free_coherent(__scm->dev, size, mdata_buf, mdata_phys);
 
 	return ret;
 }
