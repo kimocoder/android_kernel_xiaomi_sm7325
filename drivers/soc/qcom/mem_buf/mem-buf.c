@@ -1144,16 +1144,23 @@ static void *mem_buf_retrieve_ion_mem_type_data_user(
 }
 
 static void *mem_buf_retrieve_dmaheap_mem_type_data_user(
-				struct mem_buf_dmaheap_data __user *data)
+				struct mem_buf_dmaheap_data __user *udata)
 {
 	char *buf;
 	int ret;
+	struct mem_buf_dmaheap_data data;
+
+	ret = copy_struct_from_user(&data, sizeof(data),
+				    udata,
+				    sizeof(data));
+	if (ret)
+		return ERR_PTR(-EINVAL);
 
 	buf = kcalloc(MEM_BUF_MAX_DMAHEAP_NAME_LEN, sizeof(*buf), GFP_KERNEL);
 	if (!buf)
 		return ERR_PTR(-ENOMEM);
 
-	ret = strncpy_from_user(buf, (const void __user *)data->heap_name,
+	ret = strncpy_from_user(buf, (const void __user *)data.heap_name,
 			MEM_BUF_MAX_DMAHEAP_NAME_LEN);
 	if (ret < 0 || ret == MEM_BUF_MAX_DMAHEAP_NAME_LEN) {
 		kfree(buf);
