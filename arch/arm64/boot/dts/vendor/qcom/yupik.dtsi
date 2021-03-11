@@ -456,14 +456,6 @@
 		size = <0x0 0x1000000>;
 	};
 
-	secure_display_memory: secure_display_region {
-		compatible = "shared-dma-pool";
-		alloc-ranges = <0 0x00000000 0 0xffffffff>;
-		reusable;
-		alignment = <0 0x400000>;
-		size = <0 0x8c00000>;
-	};
-
 	cnss_wlan_mem: cnss_wlan_region {
 		compatible = "shared-dma-pool";
 		alloc-ranges = <0x0 0x00000000 0x0 0xffffffff>;
@@ -525,8 +517,8 @@
 		compatible = "shared-dma-pool";
 		alloc-ranges = <0x0 0x00000000 0x0 0xffffffff>;
 		reusable;
+		size = <0x0 0x8c00000>;
 		alignment = <0x0 0x400000>;
-		size = <0x0 0x6400000>;
 	};
 };
 
