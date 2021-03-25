@@ -279,7 +279,10 @@ int qcom_system_heap_create(char *name, bool uncached, int vmid)
 	struct device *heap_dev;
 	int ret;
 
-	dynamic_page_pool_init_shrinker();
+	ret = dynamic_page_pool_init_shrinker();
+	if (ret)
+		return ret;
+
 	sys_heap = kzalloc(sizeof(*sys_heap), GFP_KERNEL);
 	if (!sys_heap) {
 		ret = -ENOMEM;
