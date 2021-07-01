@@ -80,38 +80,13 @@ static char *dmabuffs_dname(struct dentry *dentry, char *buffer, int buflen)
 			     dentry->d_name.name, ret > 0 ? name : "");
 }
 
-#ifdef CONFIG_DMABUF_DESTRUCTOR_SUPPORT
-static int dma_buf_invoke_dtor(struct dma_buf *dmabuf)
-{
-	int ret = 0;
-
-	if (dmabuf->dtor) {
-		ret = dmabuf->dtor(dmabuf, dmabuf->dtor_data);
-		if (ret < 0)
-			pr_warn_ratelimited("Leaking dmabuf ino: %ld because destructor failed error: %d\n",
-					    to_msm_dma_buf(dmabuf)->i_ino, ret);
-	}
-
-	return ret;
-}
-#else
-static inline int dma_buf_invoke_dtor(struct dma_buf *dmabuf)
-{
-	return 0;
-}
-#endif
-
 static void dma_buf_release(struct dentry *dentry)
 {
-	struct msm_dma_buf *msm_dma_buf;
 	struct dma_buf *dmabuf;
-	int dtor_ret = 0;
 
 	dmabuf = dentry->d_fsdata;
 	if (unlikely(!dmabuf))
 		return;
-
-	msm_dma_buf = to_msm_dma_buf(dmabuf);
 
 	BUG_ON(dmabuf->vmapping_counter);
 
@@ -125,12 +100,7 @@ static void dma_buf_release(struct dentry *dentry)
 	 */
 	BUG_ON(dmabuf->cb_shared.active || dmabuf->cb_excl.active);
 
-	dtor_ret = dma_buf_invoke_dtor(dmabuf);
-
-	if (!dtor_ret)
-		dmabuf->ops->release(dmabuf);
-
-	dma_buf_ref_destroy(msm_dma_buf);
+	dmabuf->ops->release(dmabuf);
 
 	if (dmabuf->resv == (struct dma_resv *)&dmabuf[1])
 		dma_resv_fini(dmabuf->resv);
@@ -139,7 +109,7 @@ static void dma_buf_release(struct dentry *dentry)
 	WARN_ON(!list_empty(&dmabuf->attachments));
 	module_put(dmabuf->owner);
 	kfree(dmabuf->name);
-	kfree(msm_dma_buf);
+	kfree(dmabuf);
 }
 
 static int dma_buf_file_release(struct inode *inode, struct file *file)
@@ -577,11 +547,10 @@ err_alloc_file:
  */
 struct dma_buf *dma_buf_export(const struct dma_buf_export_info *exp_info)
 {
-	struct msm_dma_buf *msm_dma_buf;
 	struct dma_buf *dmabuf;
 	struct dma_resv *resv = exp_info->resv;
 	struct file *file;
-	size_t alloc_size = sizeof(struct msm_dma_buf);
+	size_t alloc_size = sizeof(struct dma_buf);
 	int ret;
 
 	if (!exp_info->resv)
@@ -608,13 +577,12 @@ struct dma_buf *dma_buf_export(const struct dma_buf_export_info *exp_info)
 	if (!try_module_get(exp_info->owner))
 		return ERR_PTR(-ENOENT);
 
-	msm_dma_buf = kzalloc(alloc_size, GFP_KERNEL);
-	if (!msm_dma_buf) {
+	dmabuf = kzalloc(alloc_size, GFP_KERNEL);
+	if (!dmabuf) {
 		ret = -ENOMEM;
 		goto err_module;
 	}
 
-	dmabuf = &msm_dma_buf->dma_buf;
 	dmabuf->priv = exp_info->priv;
 	dmabuf->ops = exp_info->ops;
 	dmabuf->size = exp_info->size;
@@ -636,7 +604,6 @@ struct dma_buf *dma_buf_export(const struct dma_buf_export_info *exp_info)
 		ret = PTR_ERR(file);
 		goto err_dmabuf;
 	}
-	msm_dma_buf->i_ino = file_inode(file)->i_ino;
 
 	file->f_mode |= FMODE_LSEEK;
 	dmabuf->file = file;
@@ -647,9 +614,6 @@ struct dma_buf *dma_buf_export(const struct dma_buf_export_info *exp_info)
 
 	mutex_init(&dmabuf->lock);
 	INIT_LIST_HEAD(&dmabuf->attachments);
-
-	dma_buf_ref_init(msm_dma_buf);
-	dma_buf_ref_mod(msm_dma_buf, 1);
 
 	mutex_lock(&db_list.lock);
 	list_add(&dmabuf->list_node, &db_list.head);
@@ -666,7 +630,7 @@ err_sysfs:
 	file->f_path.dentry->d_fsdata = NULL;
 	fput(file);
 err_dmabuf:
-	kfree(msm_dma_buf);
+	kfree(dmabuf);
 err_module:
 	module_put(exp_info->owner);
 	return ERR_PTR(ret);
@@ -718,7 +682,6 @@ struct dma_buf *dma_buf_get(int fd)
 		fput(file);
 		return ERR_PTR(-EINVAL);
 	}
-	dma_buf_ref_mod(to_msm_dma_buf(file->private_data), 1);
 
 	return file->private_data;
 }
@@ -739,41 +702,9 @@ void dma_buf_put(struct dma_buf *dmabuf)
 	if (WARN_ON(!dmabuf || !dmabuf->file))
 		return;
 
-	dma_buf_ref_mod(to_msm_dma_buf(dmabuf), -1);
 	fput(dmabuf->file);
 }
 EXPORT_SYMBOL_GPL(dma_buf_put);
-
-/**
- * dma_buf_put_sync - decreases refcount of the buffer
- * @dmabuf:	[in]	buffer to reduce refcount of
- *
- * Uses file's refcounting done implicitly by __fput_sync().
- *
- * If, as a result of this call, the refcount becomes 0, the 'release' file
- * operation related to this fd is called. It calls &dma_buf_ops.release vfunc
- * in turn, and frees the memory allocated for dmabuf when exported.
- *
- * This function is different than dma_buf_put() in the sense that it guarantees
- * that the 'release' file operation related to this fd is called, and that the
- * memory is released, when the refcount becomes 0. dma_buf_put() does not
- * have the same guarantee when invoked by a kernel thread (e.g. a worker
- * thread), and the refcount reaches 0; in that case, the buffer is added to
- * the delayed_fput_list, and freed asynchronously.
- *
- * This function should not be called in atomic context, and should only be
- * called by kernel threads. If in doubt, use dma_buf_put().
- */
-void dma_buf_put_sync(struct dma_buf *dmabuf)
-{
-	if (WARN_ON(!dmabuf || !dmabuf->file))
-		return;
-
-	might_sleep();
-
-	dma_buf_ref_mod(to_msm_dma_buf(dmabuf), -1);
-	__fput_sync(dmabuf->file);
-}
 
 /**
  * dma_buf_dynamic_attach - Add the device to dma_buf's attachments list; optionally,
@@ -1489,7 +1420,7 @@ static int dma_buf_debug_show(struct seq_file *s, void *unused)
 				buf_obj->file->f_flags, buf_obj->file->f_mode,
 				file_count(buf_obj->file),
 				buf_obj->exp_name,
-				to_msm_dma_buf(buf_obj)->i_ino,
+				file_inode(buf_obj->file)->i_ino,
 				buf_obj->name ?: "");
 
 		robj = buf_obj->resv;
@@ -1532,8 +1463,6 @@ static int dma_buf_debug_show(struct seq_file *s, void *unused)
 
 		seq_printf(s, "Total %d devices attached\n\n",
 				attach_count);
-
-		dma_buf_ref_show(s, to_msm_dma_buf(buf_obj));
 
 		count++;
 		size += buf_obj->size;
