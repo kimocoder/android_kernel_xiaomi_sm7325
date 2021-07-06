@@ -3414,11 +3414,14 @@ static void icnss_wpss_load(struct work_struct *wpss_load_work)
 	if (of_property_read_u32(priv->pdev->dev.of_node, "qcom,rproc-handle",
 				 &rproc_phandle)) {
 		icnss_pr_err("error reading rproc phandle\n");
+		return;
 	}
 
 	priv->rproc = rproc_get_by_phandle(rproc_phandle);
-	if (IS_ERR(priv->rproc))
-		icnss_pr_err("Failed to load wpss rproc");
+	if (IS_ERR_OR_NULL(priv->rproc)) {
+		icnss_pr_err("rproc not found");
+		return;
+	}
 
 	if (rproc_boot(priv->rproc)) {
 		icnss_pr_err("Failed to boot wpss rproc");
