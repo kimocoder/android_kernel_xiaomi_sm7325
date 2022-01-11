@@ -6,6 +6,40 @@
 #include "display/lisa-sm7325-sde-display.dtsi"
 #include "lisa-audio-overlay.dtsi"
 
+&pmr735a_debug {
+	status = "disabled";
+};
+
+&pmr735a_spmi {
+	status = "disabled";
+};
+
+&pmr735a_temp_alarm {
+	status = "disabled";
+};
+
+&apps_rsc {
+	rpmh-regulator-ldoe2 {
+		status = "disabled";
+	};
+
+	rpmh-regulator-ldoe3 {
+		status = "disabled";
+	};
+
+	rpmh-regulator-ldoe4 {
+		status = "disabled";
+	};
+
+	rpmh-regulator-ldoe5 {
+		status = "disabled";
+	};
+
+	rpmh-regulator-ldoe6 {
+		status = "disabled";
+	};
+};
+
 &pm8350c_rgb {
 	status = "disabled";
 };
