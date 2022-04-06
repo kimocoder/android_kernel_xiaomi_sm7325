@@ -1,6 +1,7 @@
 #
 # Generated files
 #
+default.bconf
 gen_crc32table
 gen_crc64table
 crc32table.h
