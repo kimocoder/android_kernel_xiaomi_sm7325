@@ -285,6 +285,18 @@ static const struct llcc_slice_config shima_data[] =  {
 	{LLCC_WRTCH,    31,  256, 1, 1, 0xFFF, 0x0,   0, 0, 0, 0, 1, 0 },
 };
 
+static const struct llcc_slice_config yupik_data[] =  {
+	{LLCC_CPUSS,     1,  768, 1, 0, 0x3F, 0x0,   0, 0, 0, 0, 1, 1 },
+	{LLCC_MDMHPGRW,  7,  512, 2, 1, 0x3F, 0x0,   0, 0, 0, 0, 1, 0 },
+	{LLCC_CMPT,     10,  768, 1, 1, 0x3F, 0x0,   0, 0, 0, 0, 1, 0 },
+	{LLCC_GPUHTW,   11,  256, 1, 1, 0x3F, 0x0,   0, 0, 0, 0, 1, 0 },
+	{LLCC_GPU,      12,  512, 1, 0, 0x3F, 0x0,   0, 0, 0, 0, 1, 0 },
+	{LLCC_MMUHWT,   13,  256, 1, 1, 0x3F, 0x0,   0, 0, 0, 0, 0, 1 },
+	{LLCC_MDMPNG,   21,  768, 0, 1, 0x3F, 0x0,   0, 0, 0, 0, 1, 0 },
+	{LLCC_WLNHW,    24,  256, 1, 1, 0x3F, 0x0,   0, 0, 0, 0, 1, 0 },
+	{LLCC_MDMVPE,   29,   64, 1, 1, 0x3F, 0x0,   0, 0, 0, 0, 1, 0 },
+};
+
 static const struct llcc_slice_config neo_xr_data[] =  {
 	{LLCC_CPUSS,     1,  6144, 1, 0, 0x3FFFFFFF,  0x0,   0, 0, 0, 1, 1, 0, 0 },
 	{LLCC_VIDSC0,    2,   128, 2, 1, 0x3FFFFFFF,  0x0,   0, 0, 0, 1, 0, 0, 0 },
@@ -433,6 +445,11 @@ static const struct qcom_llcc_config lahaina_cfg = {
 static const struct qcom_llcc_config shima_cfg = {
 	.sct_data	= shima_data,
 	.size		= ARRAY_SIZE(shima_data),
+};
+
+static const struct qcom_llcc_config yupik_cfg = {
+	.sct_data	= yupik_data,
+	.size		= ARRAY_SIZE(yupik_data),
 };
 
 static const struct qcom_llcc_config neo_xr_cfg = {
@@ -1244,6 +1261,7 @@ static const struct of_device_id qcom_llcc_of_match[] = {
 	{ .compatible = "qcom,sdm845-llcc", .data = &sdm845_cfg },
 	{ .compatible = "qcom,lahaina-llcc", .data = &lahaina_cfg },
 	{ .compatible = "qcom,shima-llcc", .data = &shima_cfg },
+	{ .compatible = "qcom,yupik-llcc", .data = &yupik_cfg },
 	{ .compatible = "qcom,neo-xr-llcc", .data = &neo_xr_cfg },
 	{ .compatible = "qcom,neo-sg-llcc", .data = &neo_sg_cfg },
 	{ .compatible = "qcom,waipio-llcc", .data = &waipio_cfg },
