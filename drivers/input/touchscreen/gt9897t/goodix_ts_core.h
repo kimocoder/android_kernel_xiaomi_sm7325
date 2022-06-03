@@ -510,6 +510,7 @@ struct goodix_ts_core {
 #endif
 
 	struct goodix_ts_esd ts_esd;
+	bool esd_initialized;
 
 	struct mutex report_mutex;
 
@@ -683,5 +684,6 @@ int goodix_fw_update_init(struct goodix_ts_core *core_data);
 void goodix_fw_update_uninit(void);
 int goodix_do_fw_update(struct goodix_ic_config *ic_config, int mode);
 int goodix_get_rawdata(struct device *dev, struct ts_rawdata_info *info);
+int goodix_ts_esd_init(struct goodix_ts_core *cd);
 
 #endif
