@@ -351,22 +351,22 @@
 		reg = <0x0 0x81800000 0x0 0x1e00000>;
 	};
 
-	pil_cvp_mem: camera@86200000 {
+	cvp_mem: camera@86200000 {
 		no-map;
 		reg = <0x0 0x86200000 0x0 0x500000>;
 	};
 
-	pil_adsp_mem: adsp@86700000 {
+	adsp_mem: adsp@86700000 {
 		no-map;
 		reg = <0x0 0x86700000 0x0 0x2800000>;
 	};
 
-	pil_cdsp_mem: cdsp@88f00000 {
+	cdsp_mem: cdsp@88f00000 {
 		no-map;
 		reg = <0x0 0x88f00000 0x0 0x1e00000>;
 	};
 
-	adsp_mem: adsp_region {
+	adsp_mem_heap: adsp_heap_region {
 		compatible = "shared-dma-pool";
 		alloc-ranges = <0x0 0x00000000 0x0 0xffffffff>;
 		reusable;
@@ -374,37 +374,37 @@
 		size = <0x0 0xC00000>;
 	};
 
-	pil_camera_mem: video@8ad00000 {
+	camera_mem: video@8ad00000 {
 		no-map;
 		reg = <0x0 0x8ad00000 0x0 0x500000>;
 	};
 
-	pil_video_mem: cvp@8b200000 {
+	video_mem: cvp@8b200000 {
 		no-map;
 		reg = <0x0 0x8b200000 0x0 0x500000>;
 	};
 
-	pil_ipa_fw_mem: ipa_fw@8b700000 {
+	ipa_fw_mem: ipa_fw@8b700000 {
 		no-map;
 		reg = <0x0 0x8b700000 0x0 0x10000>;
 	};
 
-	pil_ipa_gsi_mem: ipa_gsi@8b710000 {
+	ipa_gsi_mem: ipa_gsi@8b710000 {
 		no-map;
 		reg = <0x0 0x8b710000 0x0 0xa000>;
 	};
 
-	pil_gpu_micro_code_mem: gpu_micro_code@8b71a000 {
+	gpu_micro_code_mem: gpu_micro_code@8b71a000 {
 		no-map;
 		reg = <0x0 0x8b71a000 0x0 0x2000>;
 	};
 
-	pil_mpss_mem: mpss@8b800000 {
+	mpss_mem: mpss@8b800000 {
 		no-map;
 		reg = <0x0 0x8b800000 0x0 0xf600000>;
 	};
 
-	pil_wpss_mem: wlan@9ae00000 {
+	wpss_mem: wlan@9ae00000 {
 		no-map;
 		reg = <0x0 0x9ae00000 0x0 0x1900000>;
 	};
@@ -414,7 +414,7 @@
 		reg = <0x0 0xc0000000 0x0 0x5100000>;
 	};
 
-	pil_trustedvm_mem: pil_trustedvm_region@d0800000 {
+	trustedvm_mem: trustedvm_region@d0800000 {
 		no-map;
 		reg = <0x0 0xd0800000 0x0 0x76f7000>;
 	};
@@ -450,6 +450,14 @@
 		size = <0x0 0x1400000>;
 	};
 
+	qseecom_ta_mem: qseecom_ta_region {
+		compatible = "shared-dma-pool";
+		alloc-ranges = <0x0 0x00000000 0x0 0xffffffff>;
+		reusable;
+		alignment = <0x0 0x400000>;
+		size = <0x0 0x1000000>;
+	};
+
 	non_secure_display_memory: non_secure_display_region {
 		compatible = "shared-dma-pool";
 		alloc-ranges = <0x0 0x00000000 0x0 0xffffffff>;
@@ -461,14 +469,6 @@
 	splash_memory:splash_region {
 		reg = <0x0 0xe1000000 0x0 0x02400000>;
 		label = "cont_splash_region";
-	};
-
-	qseecom_ta_mem: qseecom_ta_region {
-		compatible = "shared-dma-pool";
-		alloc-ranges = <0x0 0x00000000 0x0 0xffffffff>;
-		reusable;
-		alignment = <0x0 0x400000>;
-		size = <0x0 0x1000000>;
 	};
 
 	secure_display_memory: secure_display_region {
@@ -3830,8 +3830,7 @@
 		};
 	};
 
-	thermal_zones: thermal-zones {
-	};
+	thermal_zones: thermal-zones { };
 
 	qmi_tmd: qmi-tmd-devices {
 		compatible = "qcom,qmi-cooling-devices";
@@ -4089,11 +4088,6 @@
 	qcom-mem-buf {
 		compatible = "qcom,mem-buf";
 		qcom,mem-buf-capabilities = "supplier";
-	};
-
-	pil_scm_pas {
-		compatible = "qcom,pil-tz-scm-pas";
-		interconnects = <&aggre2_noc MASTER_CRYPTO &mc_virt SLAVE_EBI1>;
 	};
 
 	adsp_pas: remoteproc-adsp@3700000 {
@@ -4511,7 +4505,7 @@
 		compatible = "qcom,guestvm-loader";
 		qcom,pas-id = <28>;
 		qcom,firmware-name = "trustedvm";
-		memory-region = <&pil_trustedvm_mem>;
+		memory-region = <&trustedvm_mem>;
 	};
 
 	qcom,svm_neuron_block {
@@ -4976,7 +4970,7 @@
 
 	qcom,msm-adsprpc-mem {
 		compatible = "qcom,msm-adsprpc-mem-region";
-		memory-region = <&adsp_mem>;
+		memory-region = <&adsp_mem_heap>;
 		restrict-access;
 	};
 
@@ -5179,7 +5173,7 @@
 		reg-names = "ipa-base", "gsi-base";
 		pas-ids = <0xf>;
 		firmware-names = "yupik_ipa_fws";
-		memory-regions = <&pil_ipa_gsi_mem>;
+		memory-regions = <&ipa_gsi_mem>;
 		interrupts =
 			<0 654 IRQ_TYPE_LEVEL_HIGH>,
 			<0 432 IRQ_TYPE_LEVEL_HIGH>;
