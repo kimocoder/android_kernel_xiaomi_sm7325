@@ -293,31 +293,30 @@
 		memory-region = <&system_cma>;
 	};
 
-	kgsl_iommu_test_device {
-		compatible = "iommu-debug-test";
-		iommus = <&kgsl_smmu 0x7 0>;
-		qcom,iommu-dma = "disabled";
-	};
+	iommu_test_device {
+		compatible = "qcom,iommu-debug-test";
 
-	kgsl_iommu_coherent_test_device {
-		status= "disabled";
-		compatible = "iommu-debug-test";
-		iommus = <&kgsl_smmu 0x407 0>;
-		qcom,iommu-dma = "disabled";
-		dma-coherent;
-	};
+		usecase0_apps {
+			compatible = "qcom,iommu-debug-usecase";
+			iommus = <&apps_smmu 0x0 0>;
+		};
 
-	apps_iommu_test_device {
-		compatible = "iommu-debug-test";
-		iommus = <&apps_smmu 0x0 0>;
-		qcom,iommu-dma = "disabled";
-	};
+		usecase1_apps_dma {
+			compatible = "qcom,iommu-debug-usecase";
+			iommus = <&apps_smmu 0x1 0>;
+			dma-coherent;
+		};
 
-	apps_iommu_coherent_test_device {
-		compatible = "iommu-debug-test";
-		iommus = <&apps_smmu 0x1 0>;
-		qcom,iommu-dma = "disabled";
-		dma-coherent;
+		usecase2_kgsl {
+			compatible = "qcom,iommu-debug-usecase";
+			iommus = <&kgsl_smmu 0x7 0x400>;
+		};
+
+		usecase3_kgsl_dma {
+			compatible = "qcom,iommu-debug-usecase";
+			iommus = <&kgsl_smmu 0x407 0x400>;
+			dma-coherent;
+		};
 	};
 };
 
