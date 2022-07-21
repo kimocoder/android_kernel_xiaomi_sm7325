@@ -273,9 +273,17 @@
 };
 
 &firmware {
-	scm {
+	qcom_scm {
 		compatible = "qcom,scm";
 		qcom,dload-mode = <&tcsr 0x13000>;
+	};
+
+	qtee_shmbridge {
+		compatible = "qcom,tee-shared-memory-bridge";
+	};
+
+	qcom_smcinvoke {
+		compatible = "qcom,smcinvoke";
 	};
 
 	android {
@@ -713,14 +721,6 @@
 		interconnects = <&aggre2_noc MASTER_CRYPTO &mc_virt SLAVE_EBI1>;
 		iommus = <&apps_smmu 0x04E4 0x0011>;
 		qcom,iommu-dma = "atomic";
-	};
-
-	qtee_shmbridge {
-		compatible = "qcom,tee-shared-memory-bridge";
-	};
-
-	qcom_smcinvoke {
-		compatible = "qcom,smcinvoke";
 	};
 
 	ipcc_mproc: qcom,ipcc@408000 {
