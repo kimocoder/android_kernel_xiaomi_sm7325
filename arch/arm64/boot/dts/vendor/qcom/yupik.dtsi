@@ -5556,7 +5556,7 @@
 
 #include "yupik-vidc.dtsi"
 #include "yupik-usb.dtsi"
-#include "yupik-ion.dtsi"
+#include "yupik-dma-heaps.dtsi"
 #include "msm-arm-smmu-yupik.dtsi"
 #include "yupik-qupv3.dtsi"
 #include "yupik-audio.dtsi"
