@@ -693,29 +693,40 @@
 		};
 	};
 
-	slim_aud: slim@3ac0000 {
-		cell-index = <1>;
-		compatible = "qcom,slim-ngd";
-		reg = <0x3ac0000 0x2c000>,
-			<0x3a84000 0x20000>;
-		reg-names = "slimbus_physical", "slimbus_bam_physical";
-		interrupts = <GIC_SPI 163 IRQ_TYPE_LEVEL_HIGH>,
-				<GIC_SPI 164 IRQ_TYPE_LEVEL_HIGH>;
-		interrupt-names = "slimbus_irq", "slimbus_bam_irq";
-		qcom,apps-ch-pipes = <0x0>;
-		qcom,ea-pc = <0x3e0>;
-		iommus = <&apps_smmu 0x1826 0x0>;
-		qcom,iommu-dma-addr-pool = <0x40000000 0x10000000>;
-		qcom,iommu-geometry = <0x40000000 0x10000000>;
-		qcom,iommu-dma = "fastmap";
-		status = "ok";
+	slimbam: bamdma@3a84000 {
+		compatible = "qcom,bam-v1.7.0";
+		qcom,controlled-remotely;
+		reg = <0x3a84000 0x20000>; <0x39eb000 0x1000>;
+		reg-names = "bam", "bam_remote_mem";
+		num-channels  = <31>;
+		interrupts = <0 164 IRQ_TYPE_LEVEL_HIGH>;
+		#dma-cells = <1>;
+		qcom,ee = <1>;
+		qcom,num-ees = <2>;
+	};
 
-		/* Slimbus Slave DT for QCA6490 */
-		btfmslim_codec: qca6490 {
-			compatible = "qcom,btfmslim_slave";
-			elemental-addr = [00 01 21 02 17 02];
-			qcom,btfm-slim-ifd = "btfmslim_slave_ifd";
-			qcom,btfm-slim-ifd-elemental-addr = [00 00 21 02 17 02];
+	slim_msm: slim@3ac0000 {
+		compatible = "qcom,slim-ngd-v1.5.0";
+		reg = <0x3ac0000 0x2c000>, <0x39ea000 0x1000>;
+		reg-names = "ctrl", "slimbus_remote_mem";
+		interrupts = <0 163 IRQ_TYPE_LEVEL_HIGH>;
+		qcom,apps-ch-pipes = <0x0>;
+		qcom,ea-pc = <0x3c0>;
+		dmas = <&slimbam 3>, <&slimbam 4>;
+		dma-names = "rx", "tx";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		status = "ok";
+		ngd@1 {
+			reg = <1>;
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			/* slimbus child nodes */
+			slimbus: btfmslim-driver {
+				compatible = "slim217,221";
+				reg = <1 0>;
+			};
 		};
 	};
 
