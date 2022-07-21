@@ -3821,6 +3821,13 @@
 		};
 	};
 
+	rpmh-sleep-stats@c3f0000 {
+		compatible = "qcom,rpmh-sleep-stats";
+		reg = <0xc3f0000 0x400>;
+		ss-name = "modem", "adsp", "adsp_island",
+			  "cdsp", "apss", "wpss";
+	};
+
 	spmi_bus: qcom,spmi@c440000 {
 		compatible = "qcom,spmi-pmic-arb";
 		reg = <0xc440000 0x1100>,
@@ -5426,7 +5433,6 @@
 #include "shima-gdsc.dtsi"
 #include "yupik-coresight.dtsi"
 #include "yupik-pinctrl.dtsi"
-#include "yupik-pm.dtsi"
 #include "ipcc-test-yupik.dtsi"
 #include "yupik-regulators.dtsi"
 #include "display/yupik-sde.dtsi"
