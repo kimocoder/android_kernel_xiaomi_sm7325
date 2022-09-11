@@ -531,7 +531,7 @@ struct skb_shared_info {
 	 * remains valid until skb destructor */
 	void *		destructor_arg;
 
-	ANDROID_VENDOR_DATA_ARRAY(1, 3);
+	ANDROID_OEM_DATA_ARRAY(1, 3);
 
 	/* must be last field, see pskb_expand_head() */
 	skb_frag_t	frags[MAX_SKB_FRAGS];
@@ -4120,6 +4120,7 @@ enum skb_ext_id {
 #if IS_ENABLED(CONFIG_NET_TC_SKB_EXT)
 	TC_SKB_EXT,
 #endif
+	SKB_EXT_ANDROID_VENDOR1, /* reserved for android vendor only */
 	SKB_EXT_NUM, /* must be last */
 };
 

@@ -1086,6 +1086,7 @@ void __symbol_put(const char *symbol)
 	module_put(owner);
 	preempt_enable();
 }
+EXPORT_SYMBOL(__symbol_put);
 
 /* Note this assumes addr is a function, which it currently always is. */
 void symbol_put_addr(void *addr)
@@ -2305,6 +2306,7 @@ void *__symbol_get(const char *symbol)
 
 	return sym ? (void *)kernel_symbol_value(sym) : NULL;
 }
+EXPORT_SYMBOL_GPL(__symbol_get);
 
 /*
  * Ensure that an exported symbol [global namespace] does not already exist
@@ -4111,8 +4113,6 @@ static int load_module(struct load_info *info, const char __user *uargs,
 	mutex_unlock(&module_mutex);
 
  ddebug_cleanup:
-	/* Clean up CFI for the module. */
-	cfi_cleanup(mod);
 	ftrace_release_mod(mod);
 	dynamic_debug_remove(mod, info->debug);
 	synchronize_rcu();

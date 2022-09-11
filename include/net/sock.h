@@ -533,7 +533,7 @@ struct sock {
 	ANDROID_KABI_RESERVE(7);
 	ANDROID_KABI_RESERVE(8);
 
-	ANDROID_VENDOR_DATA(1);
+	ANDROID_OEM_DATA(1);
 };
 
 enum sk_pacing {

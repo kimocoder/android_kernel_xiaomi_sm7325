@@ -1122,9 +1122,7 @@ const char * const vmstat_text[] = {
 	"nr_shadow_call_stack_bytes",
 #endif
 	"nr_bounce",
-#if IS_ENABLED(CONFIG_ZSMALLOC)
 	"nr_zspages",
-#endif
 	"nr_free_cma",
 
 	/* enum numa_stat_item counters */
@@ -1253,7 +1251,7 @@ const char * const vmstat_text[] = {
 	"unevictable_pgs_cleared",
 	"unevictable_pgs_stranded",
 
-#if defined(CONFIG_TRANSPARENT_HUGEPAGE) || defined(CONFIG_GKI_OPT_FEATURES)
+#ifdef CONFIG_TRANSPARENT_HUGEPAGE
 	"thp_fault_alloc",
 	"thp_fault_fallback",
 	"thp_collapse_alloc",

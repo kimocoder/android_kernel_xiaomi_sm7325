@@ -9,6 +9,8 @@
 #include "ufs.h"
 #include "ufs-sysfs.h"
 
+#include <trace/hooks/ufshcd.h>
+
 static const char *ufschd_uic_link_state_to_string(
 			enum uic_link_state state)
 {
@@ -211,11 +213,8 @@ static ssize_t ufs_sysfs_read_desc_param(struct ufs_hba *hba,
 	if (param_size > 8)
 		return -EINVAL;
 
-	pm_runtime_get_sync(hba->dev);
 	ret = ufshcd_read_desc_param(hba, desc_id, desc_index,
 				param_offset, desc_buf, param_size);
-	pm_runtime_put_sync(hba->dev);
-
 	if (ret)
 		return -EINVAL;
 	switch (param_size) {
@@ -581,7 +580,6 @@ static ssize_t _name##_show(struct device *dev,				\
 	desc_buf = kzalloc(QUERY_DESC_MAX_SIZE, GFP_ATOMIC);		\
 	if (!desc_buf)                                                  \
 		return -ENOMEM;                                         \
-	pm_runtime_get_sync(hba->dev);					\
 	ret = ufshcd_query_descriptor_retry(hba,			\
 		UPIU_QUERY_OPCODE_READ_DESC, QUERY_DESC_IDN_DEVICE,	\
 		0, 0, desc_buf, &desc_len);				\
@@ -598,7 +596,6 @@ static ssize_t _name##_show(struct device *dev,				\
 		goto out;						\
 	ret = snprintf(buf, PAGE_SIZE, "%s\n", desc_buf);		\
 out:									\
-	pm_runtime_put_sync(hba->dev);					\
 	kfree(desc_buf);						\
 	return ret;							\
 }									\
@@ -635,18 +632,14 @@ static ssize_t _name##_show(struct device *dev,				\
 	struct device_attribute *attr, char *buf)			\
 {									\
 	bool flag;							\
-	int ret;							\
 	u8 index = 0;							\
 	struct ufs_hba *hba = dev_get_drvdata(dev);			\
 	if (ufshcd_is_wb_flags(QUERY_FLAG_IDN##_uname))			\
 		index = ufshcd_wb_get_query_index(hba);			\
-	pm_runtime_get_sync(hba->dev);					\
-	ret = ufshcd_query_flag(hba, UPIU_QUERY_OPCODE_READ_FLAG,	\
-			QUERY_FLAG_IDN##_uname, index, &flag);		\
-	pm_runtime_put_sync(hba->dev);					\
-	if (ret)							\
+	if (ufshcd_query_flag(hba, UPIU_QUERY_OPCODE_READ_FLAG,		\
+		QUERY_FLAG_IDN##_uname, index, &flag))			\
 		return -EINVAL;						\
-	return sprintf(buf, "%s\n", flag ? "true" : "false");		\
+	return sprintf(buf, "%s\n", flag ? "true" : "false"); \
 }									\
 static DEVICE_ATTR_RO(_name)
 
@@ -695,14 +688,10 @@ static ssize_t _name##_show(struct device *dev,				\
 	struct ufs_hba *hba = dev_get_drvdata(dev);			\
 	u32 value;							\
 	u8 index = 0;							\
-	int ret;							\
 	if (ufshcd_is_wb_attrs(QUERY_ATTR_IDN##_uname))			\
 		index = ufshcd_wb_get_query_index(hba);			\
-	pm_runtime_get_sync(hba->dev);					\
-	ret = ufshcd_query_attr(hba, UPIU_QUERY_OPCODE_READ_ATTR,	\
-			QUERY_ATTR_IDN##_uname, index, 0, &value);	\
-	pm_runtime_put_sync(hba->dev);					\
-	if (ret)							\
+	if (ufshcd_query_attr(hba, UPIU_QUERY_OPCODE_READ_ATTR,		\
+		QUERY_ATTR_IDN##_uname, index, 0, &value))		\
 		return -EINVAL;						\
 	return sprintf(buf, "0x%08X\n", value);				\
 }									\
@@ -835,15 +824,10 @@ static ssize_t dyn_cap_needed_attribute_show(struct device *dev,
 	struct scsi_device *sdev = to_scsi_device(dev);
 	struct ufs_hba *hba = shost_priv(sdev->host);
 	u8 lun = ufshcd_scsi_to_upiu_lun(sdev->lun);
-	int ret;
 
-	pm_runtime_get_sync(hba->dev);
-	ret = ufshcd_query_attr(hba, UPIU_QUERY_OPCODE_READ_ATTR,
-			QUERY_ATTR_IDN_DYN_CAP_NEEDED, lun, 0, &value);
-	pm_runtime_put_sync(hba->dev);
-	if (ret)
+	if (ufshcd_query_attr(hba, UPIU_QUERY_OPCODE_READ_ATTR,
+		QUERY_ATTR_IDN_DYN_CAP_NEEDED, lun, 0, &value))
 		return -EINVAL;
-
 	return sprintf(buf, "0x%08X\n", value);
 }
 static DEVICE_ATTR_RO(dyn_cap_needed_attribute);
@@ -857,15 +841,19 @@ const struct attribute_group ufs_sysfs_lun_attributes_group = {
 	.attrs = ufs_sysfs_lun_attributes,
 };
 
-void ufs_sysfs_add_nodes(struct device *dev)
+void ufs_sysfs_add_nodes(struct ufs_hba *hba)
 {
 	int ret;
 
-	ret = sysfs_create_groups(&dev->kobj, ufs_sysfs_groups);
-	if (ret)
-		dev_err(dev,
+	ret = sysfs_create_groups(&hba->dev->kobj, ufs_sysfs_groups);
+	if (ret) {
+		dev_err(hba->dev,
 			"%s: sysfs groups creation failed (err = %d)\n",
 			__func__, ret);
+		return;
+	}
+
+	trace_android_vh_ufs_update_sysfs(hba);
 }
 
 void ufs_sysfs_remove_nodes(struct device *dev)
