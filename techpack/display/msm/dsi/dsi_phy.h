@@ -377,7 +377,8 @@ int dsi_phy_get_io_resources(struct msm_io_res *io_res);
 
 /**
  * dsi_phy_pll_parse_dfps_data() - parse dfps data for PLL
- * @phy:    DSI PHY handle
+ * @phy:	DSI PHY handle
  */
 void dsi_phy_pll_parse_dfps_data(struct msm_dsi_phy *phy);
+
 #endif /* _DSI_PHY_H_ */

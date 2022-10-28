@@ -1584,6 +1584,10 @@ static void _sde_encoder_rc_restart_delayed(struct sde_encoder_virt *sde_enc,
 	unsigned int lp, idle_pc_duration;
 	struct msm_drm_thread *disp_thread;
 
+	/* return early if called from esd thread */
+	if (!sde_enc->delay_kickoff)
+		return;
+
 	/* set idle timeout based on master connector's lp value */
 	if (sde_enc->cur_master)
 		lp = sde_connector_get_lp(
@@ -3228,7 +3232,7 @@ static void sde_encoder_get_qsync_fps_callback(
 		if (!sde_enc->cur_master ||
 			!(sde_enc->disp_info.capabilities &
 				MSM_DISPLAY_CAP_VID_MODE)) {
-			SDE_ERROR("invalid qsync settings %p\n",
+			SDE_ERROR("invalid qsync settings %d\n",
 				!sde_enc->cur_master);
 			return;
 		}
