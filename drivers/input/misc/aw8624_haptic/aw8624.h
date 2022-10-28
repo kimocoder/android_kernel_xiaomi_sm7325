@@ -3,14 +3,6 @@
 
 /*********************************************************
  *
- * kernel version
- *
- ********************************************************/
-#define INPUT_DEV
-//#define TEST_RTP
-#define TEST_CONT_TO_RAM
-/*********************************************************
- *
  * aw8624.h
  *
  ********************************************************/
@@ -23,7 +15,6 @@
 #include <linux/leds.h>
 #include <linux/atomic.h>
 #include <linux/timekeeping.h>
-
 
 /*********************************************************
  *
@@ -87,6 +78,7 @@ static int wf_s_repeat[4] = { 1, 2, 4, 8 };
 */
 #define AW8624_TRIG_NUM                     3
 
+#define INPUT_DEV
 
 enum aw8624_flags {
 	AW8624_FLAG_NONR = 0,
@@ -158,11 +150,13 @@ enum haptics_custom_effect_param {
 	CUSTOM_DATA_TIMEOUT_MSEC_IDX,
 	CUSTOM_DATA_LEN,
 };
+
 enum aw8624_haptic_strength {
 	AW8624_LIGHT_MAGNITUDE = 0x3fff,
 	AW8624_MEDIUM_MAGNITUDE = 0x5fff,
 	AW8624_STRONG_MAGNITUDE = 0x7fff,
 };
+
 /*********************************************************
  *
  * struct
@@ -304,6 +298,7 @@ const char * const pctl_names[] = {
 	"aw8624_interrupt_active",
 };
 #endif
+
 struct aw8624 {
 	struct i2c_client *i2c;
 	struct mutex lock;

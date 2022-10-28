@@ -44,6 +44,7 @@
   wakeup_source_add
   wakeup_source_create
   mipi_dsi_dcs_read
+  mipi_dsi_dcs_write
 
 # required by exfat.ko
   block_write_full_page
@@ -109,13 +110,9 @@
 # required by goodix_core.ko
   filp_close
   filp_open
-
-# required by sr100.ko
-  spi_bus_type
+  strncat
+  single_open_size
+  input_mt_sync_frame
 
 # required by incrementalfs.ko
   revert_creds
-
-# required by aw8697-haptic.ko
-i2c_smbus_read_byte_data
-i2c_smbus_write_byte_data
