@@ -1,5 +1,3 @@
-// Written by Divyanshu-Modi <Atom-X-Devs https://github.com/Atom-X-Devs>
-
 &mdss_mdp {
 	dsi_k9d_36_02_0a_dsc_cmd: qcom,mdss_dsi_k9d_36_02_0a_dsc_cmd {
 		qcom,mdss-dsi-panel-name = "xiaomi 36 02 0a cmd mode dsc dsi panel";
@@ -45,9 +43,6 @@
 			15500 30000 8000  3000
 		>;
 
-		qcom,mdss-dsi-dma-schedule-line = <1>;
-		qcom,mdss-dsi-dma-schedule-window = <50>;
-
 		qcom,mdss-dsi-display-timings {
 			timing@0 {
 				qcom,mdss-dsi-cmd-mode;
@@ -67,7 +62,7 @@
 				qcom,mdss-dsi-v-top-border = <0>;
 				qcom,mdss-dsi-v-bottom-border = <0>;
 				qcom,mdss-dsi-panel-clockrate = <682000000>;
-				qcom,mdss-dsi-panel-jitter = <0x05 0x01>;
+				qcom,mdss-dsi-panel-jitter = <0x5 0x1>;
 				qcom,mdss-mdp-transfer-time-us = <15700>;
 				qcom,mdss-dsi-on-command = [
 					/* Command Mode */
@@ -214,7 +209,7 @@
 					/* Video trim */
 					39 00 00 00 00 00 08 C3 94 01 97 D0 22 02 00
 					/* Sleep Out */
-					05 01 00 00 0A 00 02 11 00
+					05 01 00 00 32 00 02 11 00
 					/* Display On */
 					05 01 00 00 10 00 02 29 00
 				];
@@ -236,7 +231,7 @@
 
 				qcom,compression-mode = "dsc";
 				qcom,mdss-dsc-version = <0x11>;
-				qcom,mdss-dsc-scr-version = <0>;
+				qcom,mdss-dsc-scr-version = <0x0>;
 				qcom,mdss-dsc-slice-height = <12>;
 				qcom,mdss-dsc-slice-width = <1080>;
 				qcom,mdss-dsc-slice-per-pkt = <2>;
@@ -271,7 +266,7 @@
 				qcom,mdss-dsi-v-top-border = <0>;
 				qcom,mdss-dsi-v-bottom-border = <0>;
 				qcom,mdss-dsi-panel-clockrate = <682000000>;
-				qcom,mdss-dsi-panel-jitter = <0x05 0x01>;
+				qcom,mdss-dsi-panel-jitter = <0x5 0x1>;
 				qcom,mdss-mdp-transfer-time-us = <9500>;
 				qcom,mdss-dsi-on-command = [
 					/* Command Mode */
@@ -332,6 +327,7 @@
 					//U_ELVDD discharge
 					39 00 00 00 00 00 02 6F 09
 					39 00 00 00 00 00 03 D2 00 00
+					// U_ELVDD/U_ELVSS FD disable , AVDD FD enable
 					39 00 00 00 00 00 02 CE 00
 					//cmd3: aod no black
 					39 00 00 00 00 00 05 FF AA 55 A5 80
@@ -417,7 +413,7 @@
 					/* Video trim */
 					39 00 00 00 00 00 08 C3 94 01 97 D0 22 02 00
 					/* Sleep Out */
-					05 01 00 00 0A 00 02 11 00
+					05 01 00 00 32 00 02 11 00
 					/* Display On */
 					05 01 00 00 10 00 02 29 00
 				];
@@ -439,7 +435,7 @@
 
 				qcom,compression-mode = "dsc";
 				qcom,mdss-dsc-version = <0x11>;
-				qcom,mdss-dsc-scr-version = <0>;
+				qcom,mdss-dsc-scr-version = <0x0>;
 				qcom,mdss-dsc-slice-height = <12>;
 				qcom,mdss-dsc-slice-width = <1080>;
 				qcom,mdss-dsc-slice-per-pkt = <2>;

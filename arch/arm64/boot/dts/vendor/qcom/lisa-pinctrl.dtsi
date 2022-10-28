@@ -129,4 +129,103 @@
 			output-low;
 		};
 	};
+
+	/* FP_RESET_N */
+	msm_gpio_reset: msm_gpio_reset {
+		mux {
+			pins = "gpio43";
+			function = "gpio";
+		};
+		config {
+			pins = "gpio43";
+			drive-strength = <2>;
+			bias-disable;
+			output-low;
+		};
+	};
+
+	/* FP_RESET_N, state device active*/
+	msm_gpio_reset_output_high: msm_gpio_reset_output_high {
+		mux {
+			pins = "gpio43";
+			function = "gpio";
+		};
+		config {
+			pins = "gpio43";
+			drive-strength = <2>;
+			bias-disable;
+			output-high;
+		};
+	};
+
+	/* FP_INT_N */
+	msm_gpio_irq: msm_gpio_irq {
+		mux {
+			pins = "gpio34";
+			function = "gpio";
+		};
+		config {
+			pins = "gpio34";
+			drive-strength = <2>;
+			bias-pull-down;
+		};
+	};
+
+	/* AW8624_RESET_N */
+	aw8624_gpio_reset: aw8624gpio_reset {
+		mux {
+			pins = "gpio35";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio35";
+			drive-strength = <2>;
+			bias-disable;
+			output-low;
+		};
+	};
+
+	/* AW8624_RESET_N, state device active*/
+	aw8624_gpio_reset_output_high: aw8624_gpio_reset_output_high {
+		mux {
+			pins = "gpio35";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio35";
+			drive-strength = <2>;
+			bias-disable;
+			output-high;
+		};
+	};
+
+	/* AW8624_INTERRUPT_N */
+	aw8624_gpio_int: aw8624_gpio_int {
+		mux {
+			pins = "gpio18";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio18";
+			drive-strength = <2>;
+			bias-pull-up;
+			input-enable;
+		};
+	};
+
+	qupv3_se4_i2c_ds_high_active: qupv3_se4_i2c_ds_high_active {
+		mux {
+			pins = "gpio16", "gpio17";
+			function = "qup04";
+		};
+
+		config {
+			pins = "gpio16", "gpio17";
+			drive-strength = <6>;//modify to for aw8624
+			bias-pull-up;
+		};
+	};
 };
